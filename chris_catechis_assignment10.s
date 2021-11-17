@@ -19,31 +19,73 @@
             
     ARRAY_SIZE = 100
 
+    # uninitialized variable
+    median: .space 4
+
+    # labels
+    unsortedListLabel: .asciiz "Unsorted List:\n"
+    unsortedListLabel: .asciiz "Sorted List:\n"
+    medianLabel: .asciiz "Median: "
+    
     # System service calls
 	SYSTEM_EXIT = 10
 	SYSTEM_PRINT_INTEGER = 1
 	SYSTEM_PRINT_CHARACTER = 11
 	SYSTEM_PRINT_FLOAT = 2
 	SYSTEM_PRINT_STRING = 4
-    # median
 
 .text
 
-# shakeRight: begin->end, largest->end
-# takes two argument, array by reference and # elements->COUNT
+# ---------------------------------------------------------------
+# @note traverses array from begin->end, placing the largest int
+#       at the end of the array
+# @param a0 array passed by reference
+# @param a1 const value of the size of the array
+# ---------------------------------------------------------------
+.globl shakeRight
+.ent shakeRight
+shakeRight:
     # ignore previous largest
     # if swapcount == 0, list is sorted
 
-# shakeLeft: end->begin, smallest->begin
-# takes two argument, array by reference and # elements->COUNT
+.end shakeRight
+# ---------------------------------------------------------------
+# @note traverses array from end->begin, placing the smallest int
+#       at the beginning of the array
+# @param a0 array passed by reference
+# @param a1 const value of the size of the array
+# ---------------------------------------------------------------
+.globl shakeLeft
+.ent shakeLeft
+shakeLeft:
     # ignore previous smallest
     # if swapcount == 0, list is sorted
 
-# cocktailSort: Call shakeRight and shakeLeft until sorted
+.end shakeLeft
 
-# findMedian
+# ---------------------------------------------------------------
+# @note sorts the array via cocktail sort algorithm
+# @param a0 array passed by reference
+# @param a1 const value of the size of the array
+# ---------------------------------------------------------------
+.globl cocktailSort
+.ent cocktailSort
+cocktailSort:
+
+.end cocktailSort
+
+# ---------------------------------------------------------------
+# @note finds the median value an array
+# @param a0 array passed by reference
+# @param a1 const value of the size of the array
+# ---------------------------------------------------------------
+.globl findMedian
+.ent findMedian
+findMedian:
     # take two middle numbers
         # average two middle numbers
+
+.end findMedian
 
 .globl main
 .ent main
@@ -61,6 +103,11 @@ main:
 
 .end main
 
+# ---------------------------------------------------------------
+# @note prints an array to the command line
+# @parameter a0 an array passed by reference
+# @parameter a1 const value of the size of an array
+# ---------------------------------------------------------------
 .globl printArray
 .ent printArray
 printArray:
