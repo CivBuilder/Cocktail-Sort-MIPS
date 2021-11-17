@@ -45,9 +45,29 @@
 .globl shakeRight
 .ent shakeRight
 shakeRight:
+
+# ideas to be coded:
     # ignore previous largest
     # if swapcount == 0, list is sorted
 
+    li $t0, 1  # bool to check if sorted. Initialize to 1.
+    move $t1, $a0  # move array into $t1
+    move $t2, $a0  # move array into $t2
+    addu $t2, $t2, 4 # set $t2 to leading position
+    
+    sortLoop:
+        sgt $t0, $t1, $t2 # if $t1 > $t2 keep $t0 == 1
+        # if $t0 == 1, jump to incrementLoop
+
+        # swap if not greater than
+
+    incrementLoop:
+        addu $t1, $t1, 4  # array[i] = array[i+1]
+        addu $t2, $t2, 4  # increment leading comparison
+        subu $a1, $a1, 1  # --i
+    bnez $a1, sortLoop  # if i!=0, loop
+    
+    jr $ra
 .end shakeRight
 # ---------------------------------------------------------------
 # @note traverses array from end->begin, placing the smallest int
@@ -58,9 +78,17 @@ shakeRight:
 .globl shakeLeft
 .ent shakeLeft
 shakeLeft:
+    li $t0, 1  # bool to check if sorted. Initialize to 1.
+    move $t1, $a0  # move array into $t0
+    
+    sortLoop:
     # ignore previous smallest
     # if swapcount == 0, list is sorted
+        addu $t1, $t1, 4  # next character
+        subu $a1, $a1, 1  # --i
+    bnez $a1, sortLoop  # if i!=0, loop
 
+    jr $ra
 .end shakeLeft
 
 # ---------------------------------------------------------------
@@ -72,6 +100,7 @@ shakeLeft:
 .ent cocktailSort
 cocktailSort:
 
+    jr $ra
 .end cocktailSort
 
 # ---------------------------------------------------------------
@@ -85,6 +114,7 @@ findMedian:
     # take two middle numbers
         # average two middle numbers
 
+    jr $ra
 .end findMedian
 
 .globl main
