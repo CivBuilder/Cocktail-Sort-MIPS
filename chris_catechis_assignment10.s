@@ -48,18 +48,26 @@ shakeRight:
 
 # ideas to be coded:
     # ignore previous largest
-    # if swapcount == 0, list is sorted
 
-    li $t0, 1  # bool to check if sorted. Initialize to 1.
-    move $t1, $a0  # move array into $t1
+    li $t3, 0  # swapCounter.
+    move $t1,$a0 # move array into $t1
     move $t2, $a0  # move array into $t2
-    addu $t2, $t2, 4 # set $t2 to leading position
+    addu $t2, $t2, 4  # set $t2 to a leading position
     
     sortLoop:
-        sgt $t0, $t1, $t2 # if $t1 > $t2 keep $t0 == 1
-        # if $t0 == 1, jump to incrementLoop
+        li $t0, 0  # bool to check if swapped. Reinitialize to 0 each loop.
+        
+        sgt $t0, $t1, $t2 # if $t1 > $t2 set $t0 (swapped) == true
+        beq $t0, 1, incrementSwap  # increment swapCounter
+        beqz $t0, incrementLoop  # if $t0 == 1, jump to incrementLoop
 
-        # swap if not greater than
+        # swap if $t1 > $t2
+        move 4($a0), $t1
+        move ($a0), $t2
+        j incrementLoop
+
+    incrementSwap:
+        addu $t3, $t3, 1  # ++swapCounter   
 
     incrementLoop:
         addu $t1, $t1, 4  # array[i] = array[i+1]
