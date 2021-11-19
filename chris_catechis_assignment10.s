@@ -1,8 +1,8 @@
 # Author: Christopher Catechis <8000945777>
 # Section: 1001
-# Date Last Modified: 11/9/2021
-# Program Description: Creates a simple MIPS program that will utilize arrays
-# and arithmetic operations.
+# Date Last Modified: 11/17/2021
+# Program Description: This program utilizes the cocktail sort algorithm
+# on an array of size 100 and finds the median. 
 
 .data
     # Array declaration/const size
@@ -69,6 +69,7 @@ shakeRight:
     
     jr $ra
 .end shakeRight
+
 # ---------------------------------------------------------------
 # @note traverses array from end->begin, placing the smallest int
 #       at the beginning of the array
