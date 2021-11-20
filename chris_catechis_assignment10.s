@@ -24,7 +24,7 @@
 
     # labels
     unsortedListLabel: .asciiz "Unsorted List:\n"
-    unsortedListLabel: .asciiz "Sorted List:\n"
+    sortedListLabel: .asciiz "Sorted List:\n"
     medianLabel: .asciiz "Median: "
     
     # System service calls
@@ -36,109 +36,49 @@
 
 .text
 
-# ---------------------------------------------------------------
-# @note traverses array from begin->end, placing the largest int
-#       at the end of the array
-# @param a0 array passed by reference
-# @param a1 const value of the size of the array
-# ---------------------------------------------------------------
-.globl shakeRight
-.ent shakeRight
-shakeRight:
-
-# ideas to be coded:
-    # ignore previous largest
-
-    li $t3, 0  # swapCounter.
-    move $t1,$a0 # move array into $t1
-    move $t2, $a0  # move array into $t2
-    addu $t2, $t2, 4  # set $t2 to a leading position
-    
-    sortLoop:
-        li $t0, 0  # bool to check if swapped. Reinitialize to 0 each loop.
-        
-        sgt $t0, $t1, $t2 # if $t1 > $t2 set $t0 (swapped) == true
-        beq $t0, 1, incrementSwap  # increment swapCounter
-        beqz $t0, incrementLoop  # if $t0 == 1, jump to incrementLoop
-
-        # swap if $t1 > $t2
-        move 4($a0), $t1
-        move ($a0), $t2
-        j incrementLoop
-
-    incrementSwap:
-        addu $t3, $t3, 1  # ++swapCounter   
-
-    incrementLoop:
-        addu $t1, $t1, 4  # array[i] = array[i+1]
-        addu $t2, $t2, 4  # increment leading comparison
-        subu $a1, $a1, 1  # --i
-    bnez $a1, sortLoop  # if i!=0, loop
-    
-    jr $ra
-.end shakeRight
-
-# ---------------------------------------------------------------
-# @note traverses array from end->begin, placing the smallest int
-#       at the beginning of the array
-# @param a0 array passed by reference
-# @param a1 const value of the size of the array
-# ---------------------------------------------------------------
-.globl shakeLeft
-.ent shakeLeft
-shakeLeft:
-    li $t0, 1  # bool to check if sorted. Initialize to 1.
-    move $t1, $a0  # move array into $t0
-    
-    sortLoop:
-    # ignore previous smallest
-    # if swapcount == 0, list is sorted
-        addu $t1, $t1, 4  # next character
-        subu $a1, $a1, 1  # --i
-    bnez $a1, sortLoop  # if i!=0, loop
-
-    jr $ra
-.end shakeLeft
-
-# ---------------------------------------------------------------
-# @note sorts the array via cocktail sort algorithm
-# @param a0 array passed by reference
-# @param a1 const value of the size of the array
-# ---------------------------------------------------------------
-.globl cocktailSort
-.ent cocktailSort
-cocktailSort:
-
-    jr $ra
-.end cocktailSort
-
-# ---------------------------------------------------------------
-# @note finds the median value an array
-# @param a0 array passed by reference
-# @param a1 const value of the size of the array
-# ---------------------------------------------------------------
-.globl findMedian
-.ent findMedian
-findMedian:
-    # take two middle numbers
-        # average two middle numbers
-
-    jr $ra
-.end findMedian
-
 .globl main
 .ent main
 main:
 
-# print the unsorted list
-	la $a0, array
+    # print the unsorted list
+    li $v0, SYSTEM_PRINT_STRING  # print label
+    li $a0, unsortedListLabel
+    syscall 
+	la $a0, array  # print array
 	li $a1, ARRAY_SIZE
 	jal printArray
 
-# print the sorted list
-    la $a0, array
-	li $a1, ARRAY_SIZE
-	jal printArray
+    # sort the list (cocktail sort)
+    cocktailSort:
+        la $a0, array
+        li $a1, ARRAY_SIZE
+        jal shakeRight
+        beqz $v0, printSortedList  # if no swaps occur, print.
+
+        la $a0, array
+        li $a1, ARRAY_SIZE
+        jal shakeLeft
+        beqz $v0, printSortedList  # if no swaps occur, print.
+
+        j cocktailSort
+
+    # print the sorted list
+    printSortedList:
+        li $v0, SYSTEM_PRINT_STRING  # print label
+        li $a0, sortedListLabel
+        syscall 
+        la $a0, array  # print array
+        li $a1, ARRAY_SIZE
+        jal printArray
+
+    # find/print the median
+    jal findMedian  # find the median
+    li $v0, SYSTEM_PRINT_STRING  # print label
+    li $a0, medianLabel
+    syscall
+    li $vo, SYSTEM_PRINT_INTEGER  # print median
+    li $a0, median
+    syscall 
 
 .end main
 
@@ -177,3 +117,105 @@ printArray:
 
     jr $ra
 .end printArray
+
+# ---------------------------------------------------------------
+# @note traverses array from begin->end, placing the largest int
+#       at the end of the array
+# @param a0 array passed by reference
+# @param a1 const value of the size of the array
+# ---------------------------------------------------------------
+.globl shakeRight
+.ent shakeRight
+shakeRight:
+
+    li $t3, 0  # swapCounter.
+    la $t1, $a0 # move array into $t1
+    la $t2, $a0  # move array into $t2
+    addu $t2, $t2, 4  # set $t2 to a leading position
+    
+    sortLoop:
+        li $t0, 0  # bool to check if swapped. Reinitialize to 0 each loop.
+        lw $t4, ($t1)
+        lw $t5, ($t2)
+        sgt $t0, $t4, $t5 # if $t4 > $t5 set $t0 (swapped) == true
+        beq $t0, 1, swapLoop  # increment swapCounter
+        beqz $t0, incrementLoop  # if $t0 == 0, jump to incrementLoop
+
+    swapLoop:
+        addu $t3, $t3, 1  # ++swapCounter   
+        sw $t5,($a0)  # move array[i] into $t1
+        sw $t4, 4($a0)  # move array[i+1] into $t2
+
+    incrementLoop:
+        addu $t1, $t1, 4  # array[i] = array[i+1]
+        addu $t2, $t2, 4  # increment leading comparison
+        subu $a1, $a1, 1  # --i
+        bnez $a1, sortLoop  # if i!=0, loop
+    
+    move $v0, $t3  # return swapCounter
+
+    jr $ra
+.end shakeRight
+
+# ---------------------------------------------------------------
+# @note traverses array from end->begin, placing the smallest int
+#       at the beginning of the array
+# @param a0 array passed by reference
+# @param a1 const value of the size of the array
+# ---------------------------------------------------------------
+.globl shakeLeft
+.ent shakeLeft
+shakeLeft:
+
+    li $t3, 0  # swapCounter.
+    la $t1, $a0 # move array into $t1
+    la $t2, $a0  # move array into $t2
+    addu $t1, $t1, 396  # set $t1 to end position - 1
+    addu $t2, $t2, 400  # set $t2 to a previous position
+    
+    sortLoop:
+        li $t0, 0  # bool to check if swapped. Reinitialize to 0 each loop.
+        lw $t4, ($t1)
+        lw $t5, ($t2)
+        sgt $t0, $t4, $t5 # if $t4 > $t5 set $t0 (swapped) == true
+        beq $t0, 1, swapLoop  # increment swapCounter
+        beqz $t0, incrementLoop  # if $t0 == 0, jump to incrementLoop
+
+    swapLoop:
+        addu $t3, $t3, 1  # ++swapCounter   
+        sw $t5, ($a0)  # move array[i] into $t1
+        sw $t4, 4($a0)  # move array[i+1] into $t2
+
+    incrementLoop:
+        subu $t1, $t1, 4  # array[i] = array[i+1]
+        subu $t2, $t2, 4  # increment leading comparison
+        subu $a1, $a1, 1  # --i
+        bnez $a1, sortLoop  # if i!=0, loop
+    
+    move $v0, $t3  # return swapCounter
+
+    jr $ra
+.end shakeLeft
+
+# ---------------------------------------------------------------
+# @note finds the median value an array
+# @param a0 array passed by reference
+# @param a1 const value of the size of the array
+# ---------------------------------------------------------------
+.globl findMedian
+.ent findMedian
+findMedian:
+    # take two middle numbers
+    la $t1, $a0
+    la $t2, $a0
+    li $t3, 2
+    addu $t1, $t1, 200
+    addu $t2, $t2, 196
+
+    addu $t1, $t1, $t2
+    divu $t1, $t1, $t3
+
+    sw $t1, median
+
+    jr $ra
+.end findMedian
